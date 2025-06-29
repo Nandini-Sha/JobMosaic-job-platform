@@ -106,8 +106,13 @@ exports.updateEmployee = async (req, res) => {
     let updates = req.body;
 
     if (typeof updates.skills === 'string') {
-      updates.skills = updates.skills.split(',').map(s => s.trim()).filter(Boolean);
-    }
+  try {
+    updates.skills = JSON.parse(updates.skills);
+  } catch {
+    updates.skills = [];
+  }
+}
+
 
     if (typeof updates.certificates === 'string') {
       try {
