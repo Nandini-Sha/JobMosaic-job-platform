@@ -58,6 +58,8 @@ const UpdateEmployeeDialog = ({ open, onClose, employeeData, onUpdate }) => {
 
       // Convert comma-separated strings to arrays
       const skillsArray = formData.skills.split(',').map(s => s.trim()).filter(Boolean);
+      
+
       const certsArray = formData.certificates.split(',').map(c => ({ name: c.trim() })).filter(c => c.name);
 
       data.append('skills', JSON.stringify(skillsArray));
