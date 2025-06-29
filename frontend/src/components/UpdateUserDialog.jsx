@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 
-const UpdateUserDialog = ({ open, onClose, userData, onUpdate }) => {
+const UpdateUserDialog = ({ open, onClose, userId, userData, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -21,7 +21,7 @@ const UpdateUserDialog = ({ open, onClose, userData, onUpdate }) => {
     }
   });
 
-  // Populate formData when userData changes
+  // Populate form fields when userData is passed
   useEffect(() => {
     if (userData) {
       setFormData({
@@ -52,18 +52,16 @@ const UpdateUserDialog = ({ open, onClose, userData, onUpdate }) => {
     }
   };
 
-  // Submit updated data
+  // ✅ Final handleSubmit function
   const handleSubmit = async () => {
     try {
-      const userId = userData.userId; // ✅ now uses correct User ID
       console.log('Updating USER:', userId, formData);
-
-
-
       await axios.put(`http://localhost:303/api/user/${userId}`, formData);
+      
+      if (typeof onSuccess === 'function') {
+        await onSuccess(); // Refresh profile from parent
+      }
 
-      if (typeof onUpdate === 'function') onUpdate(); // Refresh parent data
-      onClose(); // Close dialog
     } catch (err) {
       console.error('User update failed:', err.response?.data || err.message);
       alert('Failed to update user info.');
@@ -125,7 +123,9 @@ const UpdateUserDialog = ({ open, onClose, userData, onUpdate }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="secondary">Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">Update</Button>
+        <Button onClick={handleSubmit} variant="contained" color="primary">
+          Update
+        </Button>
       </DialogActions>
     </Dialog>
   );
