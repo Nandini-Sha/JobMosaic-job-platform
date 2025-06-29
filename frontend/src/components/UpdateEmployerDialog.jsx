@@ -10,15 +10,20 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 
-const UpdateEmployerDialog = ({ open, onClose, employerData, onUpdate }) => {
+const UpdateEmployerDialog = ({
+  open,
+  onClose,
+  employerData,
+  employerId, // ✅ Now explicitly using employerId as a prop
+  onSuccess
+}) => {
   const [formData, setFormData] = useState({
     companyName: '',
     companyDescription: '',
     website: '',
     industry: '',
     contactPerson: '',
-    position: '',
-    userId: '',
+    position: ''
   });
 
   useEffect(() => {
@@ -29,8 +34,7 @@ const UpdateEmployerDialog = ({ open, onClose, employerData, onUpdate }) => {
         website: employerData.website || '',
         industry: employerData.industry || '',
         contactPerson: employerData.contactPerson || '',
-        position: employerData.position || '',
-        userId: employerData.userId || ''
+        position: employerData.position || ''
       });
     }
   }, [employerData]);
@@ -42,14 +46,32 @@ const UpdateEmployerDialog = ({ open, onClose, employerData, onUpdate }) => {
 
   const handleSubmit = async () => {
     try {
-      await axios.put(
-        `http://localhost:303/api/employers/${formData.userId}`,
-        formData
-      );
-      onUpdate(); // refresh data
+      const {
+        companyName,
+        companyDescription,
+        website,
+        industry,
+        contactPerson,
+        position
+      } = formData;
+
+      const updatedData = new FormData();
+      updatedData.append('companyName', companyName);
+      updatedData.append('companyDescription', companyDescription);
+      updatedData.append('website', website);
+      updatedData.append('industry', industry);
+      updatedData.append('contactPerson', contactPerson);
+      updatedData.append('position', position);
+
+      // ✅ Use employerId in the request
+      await axios.put(`http://localhost:303/api/employers/${employerId}`, updatedData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      if (onSuccess) onSuccess();
       onClose();
-    } catch (err) {
-      console.error('Failed to update employer:', err);
+    } catch (error) {
+      console.error('Failed to update employer:', error);
     }
   };
 
