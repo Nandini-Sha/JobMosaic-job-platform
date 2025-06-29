@@ -33,7 +33,8 @@ const EmployeeDashboard = () => {
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [tabValue, setTabValue] = useState(0);
 
-  const userId = localStorage.getItem('userId');
+  const userId = localStorage.getItem('userId') || profile?.userId;
+
   const navigate = useNavigate();
 
   const fetchEmployeeProfile = async () => {
@@ -61,6 +62,7 @@ const EmployeeDashboard = () => {
       setLoading(false);
     }
   };
+  
 
   const fetchJobsAndApplications = async () => {
     try {
@@ -459,8 +461,29 @@ const EmployeeDashboard = () => {
       </Dialog>
 
       {/* User & Employee Update Dialogs */}
-      <UpdateUserDialog open={openUserDialog} onClose={() => setOpenUserDialog(false)} user={profile} onUpdate={fetchEmployeeProfile} />
-      <UpdateEmployeeDialog open={openEmpDialog} onClose={() => setOpenEmpDialog(false)} employee={profile} onUpdate={fetchEmployeeProfile} />
+        <UpdateUserDialog
+  open={openUserDialog}
+  onClose={() => setOpenUserDialog(false)}
+  userId={userId}
+  userData={{
+    name: profile.name,
+    email: profile.email,
+    phone: profile.phone,
+    location: profile.location
+  }}
+  onSuccess={() => {
+    fetchEmployeeProfile(); // ✅ CORRECT
+    setOpenUserDialog(false);
+  }}
+/>
+
+     <UpdateEmployeeDialog
+  open={openEmpDialog}
+  onClose={() => setOpenEmpDialog(false)}
+  employeeData={profile}
+  onUpdate={fetchEmployeeProfile}
+/>
+
     </Box>
   );
 };
