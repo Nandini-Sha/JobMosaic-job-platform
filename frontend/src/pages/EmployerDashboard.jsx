@@ -163,21 +163,32 @@ const EmployerDashboard = () => {
     setCroppedAreaPixels(croppedPixels);
   }, []);
 
-  const showCroppedImage = async () => {
-    try {
-      const { blob } = await getCroppedImg(imageSrc, croppedAreaPixels);
-      setOpenCrop(false);
-      const formData = new FormData();
-      formData.append('companyLOGO', blob);
-      formData.append('userId', userId);
-      await axios.put(`http://localhost:303/api/employers/${userId}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      fetchEmployerProfile();
-    } catch (error) {
-      console.error('Crop/upload failed:', error);
-    }
-  };
+const showCroppedImage = async () => {
+  try {
+    const { blob } = await getCroppedImg(imageSrc, croppedAreaPixels);
+
+    const formData = new FormData();
+    formData.append('companyLOGO', blob);
+
+    // Optionally re-send other fields to preserve them (some backends replace instead of merging)
+    formData.append('companyName', profile?.companyName || '');
+    formData.append('position', profile?.position || '');
+    formData.append('companyDescription', profile?.companyDescription || '');
+    formData.append('website', profile?.website || '');
+    formData.append('industry', profile?.industry || '');
+    formData.append('contactPerson', profile?.contactPerson || '');
+
+    // 🔄 Send to backend
+    await axios.put(`http://localhost:303/api/employers/${employerId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    setOpenCrop(false);
+    fetchEmployerProfile(); // 🔄 Refresh
+  } catch (error) {
+    console.error('Crop/upload failed:', error);
+  }
+};
 
   const handleDeleteJob = async (jobId) => {
     try {
@@ -550,38 +561,54 @@ if (!profile) {
         </Dialog>
 
         {/* IMAGE CROPPER DIALOG */}
-        <Dialog open={openCrop} onClose={() => setOpenCrop(false)} maxWidth="md">
-          <DialogTitle>Crop Company Logo</DialogTitle>
-          <DialogContent>
-            <Box sx={{ position: 'relative', height: 400, width: '100%' }}>
-              <Cropper
-                image={imageSrc}
-                crop={crop}
-                zoom={zoom}
-                aspect={1}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={onCropComplete}
-              />
-            </Box>
-            <Box sx={{ mt: 2 }}>
-              <Typography>Zoom</Typography>
-              <Slider
-                value={zoom}
-                min={1}
-                max={3}
-                step={0.1}
-                onChange={(e, value) => setZoom(value)}
-              />
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenCrop(false)}>Cancel</Button>
-            <Button onClick={showCroppedImage} variant="contained">
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
+
+        <Dialog open={openCrop} onClose={() => setOpenCrop(false)} maxWidth="sm" fullWidth>
+  <DialogTitle>Crop Company Logo</DialogTitle>
+  <DialogContent>
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        height: 300,
+        background: '#333',
+        borderRadius: 2,
+        overflow: 'hidden',
+      }}
+    >
+      <Cropper
+        image={imageSrc}
+        crop={crop}
+        zoom={zoom}
+        aspect={1}
+        onCropChange={setCrop}
+        onZoomChange={setZoom}
+        onCropComplete={onCropComplete}
+      />
+    </Box>
+
+    <Box sx={{ mt: 3 }}>
+      <Typography variant="body2" gutterBottom>
+        Zoom
+      </Typography>
+      <Slider
+        value={zoom}
+        min={1}
+        max={3}
+        step={0.1}
+        onChange={(e, value) => setZoom(value)}
+        sx={{ color: '#4dd0e1' }}
+      />
+    </Box>
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setOpenCrop(false)}>Cancel</Button>
+    <Button onClick={showCroppedImage} variant="contained" sx={{ backgroundColor: '#4dd0e1', color: '#000' }}>
+      Save
+    </Button>
+  </DialogActions>
+</Dialog>
+
 
         {/* APPLICATIONS LIST DIALOG */}
         <Dialog
