@@ -94,8 +94,8 @@ exports.updateEmployer = async (req, res) => {
       updates.companyLOGO = req.file.filename;
     }
 
-    const updatedEmployer = await Employer.findOneAndUpdate(
-      { userId: req.params.id },
+    const updatedEmployer = await Employer.findByIdAndUpdate(
+      req.params.id,
       updates,
       { new: true }
     );
@@ -109,6 +109,7 @@ exports.updateEmployer = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // ✅ Delete employer by _id
 exports.deleteEmployer = async (req, res) => {
