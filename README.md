@@ -1,9 +1,5 @@
 # JobMosaic – Role-Based Job Platform
-![GitHub repo size](https://img.shields.io/github/repo-size/Nandini-Sha/JobMosaic)
-![GitHub stars](https://img.shields.io/github/stars/Nandini-Sha/JobMosaic?style=social)
-![GitHub forks](https://img.shields.io/github/forks/Nandini-Sha/JobMosaic?style=social)
-![GitHub last commit](https://img.shields.io/github/last-commit/Nandini-Sha/JobMosaic)
-![License](https://img.shields.io/github/license/Nandini-Sha/JobMosaic)
+
 
 
 A role-based job application platform where employees can apply to jobs and employers can manage applications in real time — built with React, Node.js, and MongoDB.
