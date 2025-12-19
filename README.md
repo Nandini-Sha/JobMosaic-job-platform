@@ -131,10 +131,6 @@ npm run dev
 
 ---
 
-### 2️⃣ **📸 Screenshots (Optional but Powerful)**
-
-Add images from your app — e.g., job list, dashboard, profile update, etc.
-
 ## 🎨 UI / UX Designs
 
 A quick visual walkthrough of the **Job Platform** application, showcasing key screens and user flows.
