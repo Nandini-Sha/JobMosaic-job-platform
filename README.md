@@ -135,15 +135,28 @@ npm run dev
 
 Add images from your app — e.g., job list, dashboard, profile update, etc.
 
-```markdown
-## 📸 Screenshots
+## 🎨 UI / UX Designs
 
-### 🔍 Job Listings Page
-![Job List](./screenshots/joblist.png)
+A quick visual walkthrough of the **Job Platform** application, showcasing key screens and user flows.
 
-### 👤 Employee Dashboard
-![Employee Dashboard](./screenshots/employee-dashboard.png)
-```
+### 🏠 Home & 🔐 Authentication
+| Home Page | Login Page |
+|----------|------------|
+| ![Home Page](./jobplatform/home.png) | ![Login Page](./jobplatform/login.png) |
+
+---
+
+### 👤 Employee Experience
+| Dashboard | Job Listings |
+|----------|--------------|
+| ![Employee Dashboard](./jobplatform/employee.png) | ![Job List](./jobplatform/joblist.png) |
+
+---
+
+### 📝 Job Management
+| Job Form | Job Card (Details View) |
+|---------|-------------------------|
+| ![Job Form](./jobplatform/jobform.png) | ![Job Card Details](./jobplatform/sub.png) |
 ## 📌 Future Enhancements
 
 - Add real-time notifications with Socket.io
