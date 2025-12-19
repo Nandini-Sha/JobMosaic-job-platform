@@ -141,21 +141,21 @@ A quick visual walkthrough of the **Job Platform** application, showcasing key s
 
 ### 🏠 Home & 🔐 Authentication
 | Home Page | Login Page |
-|----------|------------|
+|------------|------------|
 | ![Home Page](./jobplatform/home.png) | ![Login Page](./jobplatform/login.png) |
 
 ---
 
 ### 👤 Employee Experience
 | Dashboard | Job Listings |
-|----------|--------------|
+|------------------|------------|
 | ![Employee Dashboard](./jobplatform/employee.png) | ![Job List](./jobplatform/joblist.png) |
 
 ---
 
 ### 📝 Job Management
 | Job Form | Job Card (Details View) |
-|---------|-------------------------|
+|------------|------------|
 | ![Job Form](./jobplatform/jobform.png) | ![Job Card Details](./jobplatform/sub.png) |
 ## 📌 Future Enhancements
 
