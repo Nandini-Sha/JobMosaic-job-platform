@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Button, Typography, Box } from '@mui/material';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const ResumeUploader = ({ employeeId, onUploadSuccess }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -14,7 +16,7 @@ const ResumeUploader = ({ employeeId, onUploadSuccess }) => {
 
     try {
       setUploading(true);
-      const res = await axios.post(`http://localhost:303/api/employees/upload-resume/${employeeId}`, formData);
+      const res = await axios.post(`${API_URL}/api/employees/upload-resume/${employeeId}`, formData);
       onUploadSuccess(res.data.resumeUrl); // Pass URL back to parent
     } catch (err) {
       console.error('Upload error:', err);

@@ -11,6 +11,8 @@ import {
   Chip
 } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+const API_URL = import.meta.env.VITE_API_URL;
+
 
 const EmployeeProfile = ({ employeeId }) => {
   const [employee, setEmployee] = useState(null);
@@ -25,8 +27,8 @@ const EmployeeProfile = ({ employeeId }) => {
     const fetchData = async () => {
       try {
         const [employeeRes, userRes] = await Promise.all([
-          axios.get(`http://localhost:303/api/employees/${employeeId}`),
-          axios.get(`http://localhost:303/api/user/${userId}`)
+          axios.get(`${API_URL}/api/employees/${employeeId}`),
+          axios.get(`${API_URL}/api/user/${userId}`)
         ]);
 
         setEmployee(employeeRes.data);
@@ -44,7 +46,7 @@ const EmployeeProfile = ({ employeeId }) => {
   const updateStatusAndGoBack = async (status) => {
     try {
       if (applicationId) {
-        await axios.put(`http://localhost:303/api/applications/${applicationId}/status`, { status });
+        await axios.put(`${API_URL}/api/applications/${applicationId}/status`, { status });
       } else {
         console.warn('No applicationId found in URL');
       }
@@ -188,7 +190,7 @@ const EmployeeProfile = ({ employeeId }) => {
               variant="outlined"
               href={employee.resume.startsWith('http')
                 ? employee.resume
-                : `http://localhost:303/uploads/resumes/${employee.resume}`
+                : `${API_URL}/uploads/resumes/${employee.resume}`
               }
               target="_blank"
               sx={{ color: '#4dd0e1', borderColor: '#4dd0e1' }}

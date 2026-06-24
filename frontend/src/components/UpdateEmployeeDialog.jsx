@@ -4,7 +4,7 @@ import {
   TextField, Button, Grid, Typography
 } from '@mui/material';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL;
 const UpdateEmployeeDialog = ({ open, onClose, employeeData, onUpdate }) => {
   const [formData, setFormData] = useState({
     pastexperience: '',
@@ -68,7 +68,7 @@ const UpdateEmployeeDialog = ({ open, onClose, employeeData, onUpdate }) => {
       if (formData.resume) data.append('resume', formData.resume);
 
       await axios.put(
-        `http://localhost:303/api/employees/${employeeData.userId}`,
+        `${API_URL}/api/employees/${employeeData.userId}`,
         data,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );

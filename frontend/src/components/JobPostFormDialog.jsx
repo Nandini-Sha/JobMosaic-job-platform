@@ -7,6 +7,7 @@ import {
 import axios from 'axios';
 
 const employmentOptions = ['Full-Time', 'Part-Time', 'Contract', 'Internship', 'Freelance'];
+const API_URL = import.meta.env.VITE_API_URL;
 
 const JobPostFormDialog = ({ open, onClose, employerId, jobData, onSuccess }) => {
   const [form, setForm] = useState({
@@ -100,9 +101,9 @@ const handleSubmit = async () => {
 
   try {
     if (jobData) {
-      await axios.put(`http://localhost:303/api/jobs/${jobData._id}`, payload);
+      await axios.put(`${API_URL}/api/jobs/${jobData._id}`, payload);
     } else {
-      await axios.post('http://localhost:303/api/jobs', payload);
+      await axios.post(`${API_URL}/api/jobs`, payload);
     }
     onSuccess();
   } catch (error) {

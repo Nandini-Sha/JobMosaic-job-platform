@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL;
 const UpdateProfilePic = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -64,7 +64,7 @@ const UpdateProfilePic = () => {
       // PUT request to update employee by _id with profile picture upload
       // Your backend route expects employee _id here (userId param is used as employee _id)
       const res = await axios.put(
-        `http://localhost:303/api/employees/${userId}`,
+        `${API_URL}/api/employees/${userId}`,
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );

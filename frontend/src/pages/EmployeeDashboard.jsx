@@ -13,7 +13,7 @@ import UpdateEmployeeDialog from '../components/UpdateEmployeeDialog';
 import defaultMale from '../assets/male.jpg';
 import defaultFemale from '../assets/female.jpg';
 import defaultNeutral from '../assets/download.jpg';
-
+const API_URL = import.meta.env.VITE_API_URL;
 const EmployeeDashboard = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,8 +40,8 @@ const EmployeeDashboard = () => {
   const fetchEmployeeProfile = async () => {
     try {
       if (!userId) return;
-      const userRes = await axios.get(`http://localhost:303/api/user/${userId}`);
-      const empRes = await axios.get(`http://localhost:303/api/employees/by-user/${userId}`);
+      const userRes = await axios.get(`${API_URL}/api/user/${userId}`);
+      const empRes = await axios.get(`${API_URL}/api/employees/by-user/${userId}`);
 
       if (!empRes.data || Object.keys(empRes.data).length === 0) {
         console.warn('Employee not found. Redirecting...');
@@ -66,14 +66,14 @@ const EmployeeDashboard = () => {
 
   const fetchJobsAndApplications = async () => {
     try {
-      const jobsRes = await axios.get(`http://localhost:303/api/jobs`);
+      const jobsRes = await axios.get(`${API_URL}/api/jobs`);
       const validJobs = jobsRes.data.filter(job => new Date(job.applicationDeadline) >= new Date());
       setAllJobs(validJobs);
       setFilteredJobs(validJobs);
 
 
       if (profile?.employeeId) {
-        const appRes = await axios.get(`http://localhost:303/api/applications/employee/${profile.employeeId}`);
+        const appRes = await axios.get(`${API_URL}/api/applications/employee/${profile.employeeId}`);
         setAppliedJobs(appRes.data);
       }
     } catch (err) {
@@ -114,7 +114,7 @@ const EmployeeDashboard = () => {
         employerId: job.employerId,
       };
 
-      await axios.post(`http://localhost:303/api/applications`, payload);
+      await axios.post(`${API_URL}3/api/applications`, payload);
       fetchJobsAndApplications();
     } catch (err) {
       if (err.response?.status === 409) {
@@ -138,7 +138,7 @@ const EmployeeDashboard = () => {
   };
 
   const getResumeUrl = (resume) =>
-    resume?.startsWith('http') ? resume : `http://localhost:303/uploads/resumes/${resume}`;
+    resume?.startsWith('http') ? resume : `${API_URL}/uploads/resumes/${resume}`;
 
   const onCropComplete = useCallback((_, croppedPixels) => {
     setCroppedAreaPixels(croppedPixels);
@@ -161,7 +161,7 @@ const EmployeeDashboard = () => {
       const formData = new FormData();
       formData.append('profilepicture', blob);
       formData.append('userId', userId);
-      await axios.put(`http://localhost:303/api/employees/${userId}`, formData, {
+      await axios.put(`${API_URL}/api/employees/${userId}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setOpenCrop(false);
@@ -173,7 +173,7 @@ const EmployeeDashboard = () => {
 
   const handleRemoveProfilePic = async () => {
     try {
-      await axios.put(`http://localhost:303/api/employees/remove-profile-picture/${userId}`);
+      await axios.put(`${API_URL}/api/employees/remove-profile-picture/${userId}`);
       fetchEmployeeProfile();
     } catch (err) {
       console.error('Remove profile pic failed:', err);
@@ -182,8 +182,8 @@ const EmployeeDashboard = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      await axios.delete(`http://localhost:303/api/user/${profile.userId}`);
-      await axios.delete(`http://localhost:303/api/employees/${profile.employeeId}`);
+      await axios.delete(`${API_URL}/api/user/${profile.userId}`);
+      await axios.delete(`${API_URL}/api/employees/${profile.employeeId}`);
       localStorage.clear();
       navigate('/register');
     } catch (err) {
@@ -221,7 +221,7 @@ const EmployeeDashboard = () => {
           <>
             <Stack alignItems="center">
               <img
-                src={profile.profilepicture ? `http://localhost:303/uploads/profilepics/${profile.profilepicture}?${Date.now()}` : getDefaultAvatar(profile.gender)}
+                src={profile.profilepicture ? `${API_URL}/uploads/profilepics/${profile.profilepicture}?${Date.now()}` : getDefaultAvatar(profile.gender)}
                 alt="Profile"
                 style={{ width: 150, height: 150, borderRadius: '50%', objectFit: 'cover' }}
               />
