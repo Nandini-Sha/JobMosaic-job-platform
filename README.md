@@ -118,7 +118,7 @@ jobmosaic/
 ```bash
 cd backend
 npm install
-npm run dev
+npm start
 ```
 ### Make sure you have .env file in your root folder with
 ```
