@@ -2,13 +2,24 @@ const mongoose = require('mongoose');//importing mongoose library for database c
 
 
 // asynchronous function for database connection
-const connectdb = async()=>{
+// const connectdb = async()=>{
+//   try {
+//     await mongoose.connect(process.env.MONGO_URI);//wait and then using environment variable to connect MongoDB Atlas
+//     console.log('MongoDB connected');
+//   }catch (error){
+//     console.error(error);
+//     process.exit(1);//exit in case error occured
+//   }
+// };
+const connectdb = async () => {
+  console.log("MONGO_URI exists:", !!process.env.MONGO_URI);
+
   try {
-    await mongoose.connect(process.env.MONGO_URI);//wait and then using environment variable to connect MongoDB Atlas
-    console.log('MongoDB connected');
-  }catch (error){
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB connected");
+  } catch (error) {
     console.error(error);
-    process.exit(1);//exit in case error occured
+    process.exit(1);
   }
 };
 
