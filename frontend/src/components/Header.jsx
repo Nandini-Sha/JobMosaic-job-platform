@@ -4,7 +4,7 @@ import {
   Box, Button, Drawer, List, ListItemButton, ListItemText
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import logo from "../assets/logo.png";
 
 const navItems = [
@@ -15,6 +15,13 @@ const navItems = [
 const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const toggleDrawer = () => setDrawerOpen(!drawerOpen);
+  const location = useLocation(); // Forces re-render on navigation
+  const token = localStorage.getItem('token');
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = '/login';
+  };
 
   const drawer = (
     <Box onClick={toggleDrawer} sx={{ textAlign: 'center' }}>
@@ -27,12 +34,20 @@ const Header = () => {
             <ListItemText primary={x.text} />
           </ListItemButton>
         ))}
-        <ListItemButton component={Link} to="/login">
-          <ListItemText primary="Login" />
-        </ListItemButton>
-        <ListItemButton component={Link} to="/register">
-          <ListItemText primary="Register" />
-        </ListItemButton>
+        {!token ? (
+          <>
+            <ListItemButton component={Link} to="/login">
+              <ListItemText primary="Login" />
+            </ListItemButton>
+            <ListItemButton component={Link} to="/register">
+              <ListItemText primary="Register" />
+            </ListItemButton>
+          </>
+        ) : (
+          <ListItemButton onClick={handleLogout}>
+            <ListItemText primary="Logout" sx={{ color: '#ff4c4c' }} />
+          </ListItemButton>
+        )}
       </List>
     </Box>
   );
@@ -90,17 +105,29 @@ const Header = () => {
                 {x.text}
               </Button>
             ))}
-            <Button color="inherit" component={Link} to="/login">
-              Login
-            </Button>
-            <Button
-              color="inherit"
-              component={Link}
-              to="/register"
-              sx={{ backgroundColor: "rgb(92, 225, 230)", borderRadius: '50px' }}
-            >
-              Register
-            </Button>
+            {!token ? (
+              <>
+                <Button color="inherit" component={Link} to="/login">
+                  Login
+                </Button>
+                <Button
+                  color="inherit"
+                  component={Link}
+                  to="/register"
+                  sx={{ backgroundColor: "rgb(92, 225, 230)", borderRadius: '50px' }}
+                >
+                  Register
+                </Button>
+              </>
+            ) : (
+              <Button
+                color="inherit"
+                onClick={handleLogout}
+                sx={{ backgroundColor: "#ff4c4c", borderRadius: '50px', '&:hover': { backgroundColor: "#ff3333" } }}
+              >
+                Logout
+              </Button>
+            )}
           </Box>
 
           {/* Mobile Menu Icon */}

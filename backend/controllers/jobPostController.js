@@ -95,6 +95,11 @@ exports.deleteJobPost = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ message: 'Job not found' });
     }
+    
+    // Cascading delete: remove all job applications for this job
+    const JobApplication = require('../models/JobApplication');
+    await JobApplication.deleteMany({ jobId: req.params.id });
+
     res.status(200).json({ message: 'Job deleted successfully' });
   } catch (error) {
     console.error('❌ Error deleting job:', error);

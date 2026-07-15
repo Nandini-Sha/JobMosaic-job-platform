@@ -1,15 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import {
-  Box, Typography, Paper, CircularProgress, Divider, Chip,
-  Stack, Button, Dialog, DialogTitle, DialogContent, DialogActions,
-  Slider, DialogContentText, Tabs, Tab
+  Box, Typography, Paper, CircularProgress, Chip, Button,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  DialogContentText, Tabs, Tab
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import Cropper from 'react-easy-crop';
 import getCroppedImg from '../utils/cropImage';
 import UpdateUserDialog from '../components/UpdateUserDialog';
 import UpdateEmployeeDialog from '../components/UpdateEmployeeDialog';
+import EmployeeSidebar from '../components/dashboard/EmployeeSidebar';
+import EmployeeBrowseJobs from '../components/dashboard/EmployeeBrowseJobs';
+import EmployeeApplications from '../components/dashboard/EmployeeApplications';
+import ImageCropperDialog from '../components/dashboard/ImageCropperDialog';
 import defaultMale from '../assets/male.jpg';
 import defaultFemale from '../assets/female.jpg';
 import defaultNeutral from '../assets/download.jpg';
@@ -88,6 +91,10 @@ const EmployeeDashboard = () => {
   useEffect(() => {
     if (profile?.employeeId) {
       fetchJobsAndApplications();
+      const intervalId = setInterval(() => {
+        fetchJobsAndApplications();
+      }, 10000); // Poll every 10 seconds
+      return () => clearInterval(intervalId);
     }
   }, [profile]);
 
@@ -114,7 +121,7 @@ const EmployeeDashboard = () => {
         employerId: job.employerId,
       };
 
-      await axios.post(`${API_URL}3/api/applications`, payload);
+      await axios.post(`${API_URL}/api/applications`, payload);
       fetchJobsAndApplications();
     } catch (err) {
       if (err.response?.status === 409) {
@@ -200,10 +207,19 @@ const EmployeeDashboard = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ mt: 10, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography>Loading Dashboard...</Typography>
+      </Box>
+    );
+  }
+
   if (!profile) {
     return (
-      <Box p={4}>
-        <Typography color="error">Employee profile not found. Please complete your details.</Typography>
+      <Box p={4} textAlign="center">
+        <Typography color="error" variant="h6">Employee profile not found. Please complete your details.</Typography>
       </Box>
     );
   }
@@ -214,102 +230,23 @@ const EmployeeDashboard = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row', p: 2 }}>
       {/* LEFT PANEL */}
-      <Paper elevation={3} sx={{ width: '30%', p: 2, mr: 2, height: '80vh', overflowY: 'auto', backgroundColor: '#000', color: '#fff' }}>
-        {loading ? (
+      {loading ? (
+        <Paper elevation={3} sx={{ width: '30%', p: 2, mr: 2, height: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
           <CircularProgress />
-        ) : (
-          <>
-            <Stack alignItems="center">
-              <img
-                src={profile.profilepicture ? `${API_URL}/uploads/profilepics/${profile.profilepicture}?${Date.now()}` : getDefaultAvatar(profile.gender)}
-                alt="Profile"
-                style={{ width: 150, height: 150, borderRadius: '50%', objectFit: 'cover' }}
-              />
-              <input type="file" accept="image/*" onChange={handleFileSelect} id="profilePicInput" style={{ display: 'none' }} />
-              <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
-                <Button onClick={() => document.getElementById('profilePicInput').click()} variant="outlined" size="small" sx={{ color: '#4dd0e1', borderColor: '#4dd0e1' }}>Update Pic</Button>
-                <Button onClick={handleRemoveProfilePic} variant="outlined" size="small" color="error">Remove Pic</Button>
-              </Stack>
-            </Stack>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Stack spacing={1.5} alignItems="center">
-              <Typography variant="h6" sx={{ color: '#4dd0e1' }}>{profile.name}</Typography>
-              <Typography>Email: {profile.email}</Typography>
-              <Typography>Phone: {profile.phone || 'N/A'}</Typography>
-              {hasLocation && (
-                <>
-                  {profile.location.city && <Typography>City: {profile.location.city}</Typography>}
-                  {profile.location.state && <Typography>State: {profile.location.state}</Typography>}
-                  {profile.location.country && <Typography>Country: {profile.location.country}</Typography>}
-                </>
-              )}
-              <Button variant="outlined" size="small" onClick={() => setOpenUserDialog(true)} sx={{ color: '#4dd0e1', borderColor: '#4dd0e1' }}>Update User Info</Button>
-            </Stack>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Stack spacing={2} alignItems="center">
-              {Array.isArray(profile.skills) && profile.skills.length > 0 && (
-                <>
-                  <Typography fontWeight="bold" textAlign="center">Skills</Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="center">
-                    {profile.skills.map((skill, i) => (
-                      <Chip key={i} label={skill} size="small" sx={{ backgroundColor: '#4dd0e1', color: '#000' }} />
-                    ))}
-                  </Stack>
-                </>
-              )}
-
-              {hasPastExperience && (
-                <>
-                  <Typography fontWeight="bold" textAlign="center">Experience: {profile.pastexperience}</Typography>
-                  <Typography textAlign="center">Company: {profile.experience?.company || 'N/A'}</Typography>
-                  <Typography textAlign="center">Role: {profile.experience?.role || 'N/A'}</Typography>
-                  <Typography textAlign="center">Duration: {profile.experience?.duration || 'N/A'}</Typography>
-                </>
-              )}
-
-              <Typography fontWeight="bold" textAlign="center">Resume</Typography>
-              {profile.resume ? (
-                <Chip
-                  label="View Resume"
-                  component="a"
-                  href={getResumeUrl(profile.resume)}
-                  target="_blank"
-                  clickable
-                  variant="outlined"
-                  sx={{ color: '#4dd0e1', borderColor: '#4dd0e1' }}
-                />
-              ) : (
-                <Typography textAlign="center">No resume uploaded</Typography>
-              )}
-
-              {Array.isArray(profile.certificates) && profile.certificates.length > 0 && (
-                <>
-                  <Typography fontWeight="bold" textAlign="center">Certificates</Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="center">
-                    {profile.certificates.map((c, i) => (
-                      <Chip key={i} label={c.name || c} size="small" sx={{ backgroundColor: '#4dd0e1', color: '#000' }} />
-                    ))}
-                  </Stack>
-                </>
-              )}
-
-              {profile.bio && (
-                <>
-                  <Typography fontWeight="bold" textAlign="center">Bio</Typography>
-                  <Typography textAlign="center">{profile.bio}</Typography>
-                </>
-              )}
-
-              <Button variant="outlined" size="small" onClick={() => setOpenEmpDialog(true)} sx={{ color: '#4dd0e1', borderColor: '#4dd0e1' }}>Update Employee Details</Button>
-              <Button variant="contained" color="error" size="small" onClick={() => setOpenDeleteConfirm(true)}>Delete Profile</Button>
-            </Stack>
-          </>
-        )}
-      </Paper>
+        </Paper>
+      ) : (
+        <EmployeeSidebar
+          profile={profile}
+          API_URL={API_URL}
+          handleFileSelect={handleFileSelect}
+          handleRemoveProfilePic={handleRemoveProfilePic}
+          setOpenUserDialog={setOpenUserDialog}
+          setOpenEmpDialog={setOpenEmpDialog}
+          setOpenDeleteConfirm={setOpenDeleteConfirm}
+          getDefaultAvatar={getDefaultAvatar}
+          getResumeUrl={getResumeUrl}
+        />
+      )}
 
       {/* RIGHT PANEL */}
       <Paper elevation={3} sx={{ width: '70%', p: 2, height: '80vh', overflowY: 'auto', backgroundColor: 'rgba(92, 225, 230, 0.29)' }}>
@@ -319,113 +256,36 @@ const EmployeeDashboard = () => {
         </Tabs>
 
         {tabValue === 0 ? (
-          <>
-            <Typography variant="h6">Available Jobs</Typography>
-            <Box mt={2}>
-              <input
-                type="text"
-                placeholder="Search by title or category"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #4dd0e1', background: '#000', color: '#fff' }}
-              />
-            </Box>
-
-            <Box mt={3}>
-              {filteredJobs.map(job => {
-                const status = getApplicationStatus(job._id);
-                return (
-                  <Paper key={job._id} sx={{ mb: 2, p: 2, backgroundColor: '#000', color: '#fff', border: '1px solid #4dd0e1' }}>
-                    <Typography variant="h6" sx={{ color: '#4dd0e1' }}>{job.title}</Typography>
-                    <Typography>{job.employerId?.companyName || 'N/A'} • {job.location?.city || 'N/A'}</Typography>
-                    <Typography>Category: {job.category}</Typography>
-                    <Typography>Type: {job.employmentType}</Typography>
-                    <Typography>Deadline: {new Date(job.applicationDeadline).toLocaleDateString()}</Typography>
-                    <Typography>Description: {job.description}</Typography>
-                    <Typography>Requirements: {Array.isArray(job.requirements) ? job.requirements.join(', ') : job.requirements}</Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                      {status ? renderStatusChip(status) : (
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          sx={{ color: '#4dd0e1', borderColor: '#4dd0e1' }}
-                          onClick={() => { setSelectedJob(job); setOpenJobDialog(true); }}
-                        >
-                          View & Apply
-                        </Button>
-                      )}
-                    </Box>
-                  </Paper>
-                );
-              })}
-            </Box>
-          </>
+          <EmployeeBrowseJobs
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filteredJobs={filteredJobs}
+            getApplicationStatus={getApplicationStatus}
+            renderStatusChip={renderStatusChip}
+            setSelectedJob={setSelectedJob}
+            setOpenJobDialog={setOpenJobDialog}
+          />
         ) : (
-          <>
-            <Typography variant="h6">My Applications</Typography>
-<Box mt={3}>
-  {appliedJobs.length === 0 ? (
-    <Typography>You haven't applied to any jobs yet.</Typography>
-  ) : (
-    appliedJobs.map(application => (
-      <Paper
-        key={application._id}
-        sx={{
-          mb: 2,
-          p: 2,
-          backgroundColor: '#000',
-          color: '#fff',
-          border: '1px solid #4dd0e1'
-        }}
-      >
-        <Typography variant="h6" sx={{ color: '#4dd0e1' }}>
-          {application.jobId?.title || 'Job Title Unavailable'}
-        </Typography>
-        <Typography>
-          Category: {application.jobId?.category || 'N/A'}
-        </Typography>
-        <Typography>
-          Status: {renderStatusChip(application.status)}
-        </Typography>
-        <Typography>
-          Applied on: {new Date(application.createdAt).toLocaleDateString()}
-        </Typography>
-
-        {application.status === 'selected' && (
-          <Typography sx={{ color: 'success.main', mt: 1 }}>
-            Congratulations! You've been selected.
-          </Typography>
-        )}
-
-        {application.status === 'rejected' && (
-          <Typography sx={{ color: 'error.main', mt: 1 }}>
-            Unfortunately, your application wasn't selected.
-          </Typography>
-        )}
-      </Paper>
-    ))
-  )}
-</Box>
-</>
+          <EmployeeApplications
+            appliedJobs={appliedJobs}
+            renderStatusChip={renderStatusChip}
+          />
         )}
       </Paper>
 
-      {/* Crop Dialog */}
-      <Dialog open={openCrop} onClose={() => setOpenCrop(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Crop Profile Picture</DialogTitle>
-        <DialogContent dividers>
-          <Box sx={{ position: 'relative', height: 300 }}>
-            <Cropper image={imageSrc} crop={crop} zoom={zoom} aspect={1} onCropChange={setCrop} onCropComplete={onCropComplete} onZoomChange={setZoom} />
-          </Box>
-          <Slider min={1} max={3} step={0.1} value={zoom} onChange={(e, z) => setZoom(z)} sx={{ mt: 2 }} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenCrop(false)}>Cancel</Button>
-          <Button onClick={showCroppedImage}>Crop & Upload</Button>
-        </DialogActions>
-      </Dialog>
+      {/* Shared Dialogs */}
+      <ImageCropperDialog
+        open={openCrop}
+        onClose={() => setOpenCrop(false)}
+        imageSrc={imageSrc}
+        crop={crop}
+        setCrop={setCrop}
+        zoom={zoom}
+        setZoom={setZoom}
+        onCropComplete={onCropComplete}
+        onSave={showCroppedImage}
+      />
 
-      {/* Delete Dialog */}
       <Dialog open={openDeleteConfirm} onClose={() => setOpenDeleteConfirm(false)}>
         <DialogTitle>Delete Profile?</DialogTitle>
         <DialogContent>
@@ -437,7 +297,6 @@ const EmployeeDashboard = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Job Dialog */}
       <Dialog open={openJobDialog} onClose={() => setOpenJobDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Job Details</DialogTitle>
         <DialogContent dividers>
@@ -460,30 +319,28 @@ const EmployeeDashboard = () => {
         </DialogActions>
       </Dialog>
 
-      {/* User & Employee Update Dialogs */}
-        <UpdateUserDialog
-  open={openUserDialog}
-  onClose={() => setOpenUserDialog(false)}
-  userId={userId}
-  userData={{
-    name: profile.name,
-    email: profile.email,
-    phone: profile.phone,
-    location: profile.location
-  }}
-  onSuccess={() => {
-    fetchEmployeeProfile(); // ✅ CORRECT
-    setOpenUserDialog(false);
-  }}
-/>
+      <UpdateUserDialog
+        open={openUserDialog}
+        onClose={() => setOpenUserDialog(false)}
+        userId={userId}
+        userData={{
+          name: profile.name,
+          email: profile.email,
+          phone: profile.phone,
+          location: profile.location
+        }}
+        onSuccess={() => {
+          fetchEmployeeProfile();
+          setOpenUserDialog(false);
+        }}
+      />
 
-     <UpdateEmployeeDialog
-  open={openEmpDialog}
-  onClose={() => setOpenEmpDialog(false)}
-  employeeData={profile}
-  onUpdate={fetchEmployeeProfile}
-/>
-
+      <UpdateEmployeeDialog
+        open={openEmpDialog}
+        onClose={() => setOpenEmpDialog(false)}
+        employeeData={profile}
+        onUpdate={fetchEmployeeProfile}
+      />
     </Box>
   );
 };

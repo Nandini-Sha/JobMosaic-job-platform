@@ -125,8 +125,21 @@ exports.deleteEmployer = async (req, res) => {
       }
     }
 
-    res.json({ message: 'Employer deleted successfully' });
+    // Cascading delete: remove all jobs posted by this employer and their applications
+    const JobPost = require('../models/JobPost');
+    const JobApplication = require('../models/JobApplication');
+    
+    const employerJobs = await JobPost.find({ employerId: req.params.id });
+    const jobIds = employerJobs.map(job => job._id);
+    
+    if (jobIds.length > 0) {
+      await JobApplication.deleteMany({ jobId: { $in: jobIds } });
+      await JobPost.deleteMany({ employerId: req.params.id });
+    }
+
+    res.json({ message: 'Employer and associated jobs deleted successfully' });
   } catch (err) {
+    console.error('Error deleting employer:', err);
     res.status(500).json({ message: err.message });
   }
 };

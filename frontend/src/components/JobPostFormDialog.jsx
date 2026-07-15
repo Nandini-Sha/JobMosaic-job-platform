@@ -27,40 +27,42 @@ const JobPostFormDialog = ({ open, onClose, employerId, jobData, onSuccess }) =>
   });
 
   useEffect(() => {
-    if (jobData) {
-      setForm({
-        title: jobData.title || '',
-        description: jobData.description || '',
-        requirements: (jobData.requirements || []).join(', '),
-        salaryMin: jobData.salaryRange?.min || '',
-        salaryMax: jobData.salaryRange?.max || '',
-        employmentType: jobData.employmentType || 'Full-Time',
-        applicationDeadline: jobData.applicationDeadline?.slice(0, 10) || '',
-        category: jobData.category || '',
-        location: {
-          city: jobData.location?.city || '',
-          state: jobData.location?.state || '',
-          country: jobData.location?.country || ''
-        }
-      });
-    } else {
-      setForm({
-        title: '',
-        description: '',
-        requirements: '',
-        salaryMin: '',
-        salaryMax: '',
-        employmentType: 'Full-Time',
-        applicationDeadline: '',
-        category: '',
-        location: {
-          city: '',
-          state: '',
-          country: ''
-        }
-      });
+    if (open) {
+      if (jobData) {
+        setForm({
+          title: jobData.title || '',
+          description: jobData.description || '',
+          requirements: (jobData.requirements || []).join(', '),
+          salaryMin: jobData.salaryRange?.min || '',
+          salaryMax: jobData.salaryRange?.max || '',
+          employmentType: jobData.employmentType || 'Full-Time',
+          applicationDeadline: jobData.applicationDeadline?.slice(0, 10) || '',
+          category: jobData.category || '',
+          location: {
+            city: jobData.location?.city || '',
+            state: jobData.location?.state || '',
+            country: jobData.location?.country || ''
+          }
+        });
+      } else {
+        setForm({
+          title: '',
+          description: '',
+          requirements: '',
+          salaryMin: '',
+          salaryMax: '',
+          employmentType: 'Full-Time',
+          applicationDeadline: '',
+          category: '',
+          location: {
+            city: '',
+            state: '',
+            country: ''
+          }
+        });
+      }
     }
-  }, [jobData]);
+  }, [jobData, open]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

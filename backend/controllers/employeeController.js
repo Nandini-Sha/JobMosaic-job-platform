@@ -161,8 +161,30 @@ exports.deleteEmployee = async (req, res) => {
   try {
     const deleted = await Employee.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: 'Employee not found' });
-    res.json({ message: 'Employee deleted successfully' });
+
+    // Delete profile picture from disk
+    if (deleted.profilepicture) {
+      const imagePath = path.join(__dirname, '../uploads/profilepics', deleted.profilepicture);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    // Delete resume from disk
+    if (deleted.resume) {
+      const resumePath = path.join(__dirname, '../uploads/resumes', deleted.resume);
+      if (fs.existsSync(resumePath)) {
+        fs.unlinkSync(resumePath);
+      }
+    }
+
+    // Cascading delete: remove all job applications made by this employee
+    const JobApplication = require('../models/JobApplication');
+    await JobApplication.deleteMany({ employeeId: req.params.id });
+
+    res.json({ message: 'Employee and associated applications deleted successfully' });
   } catch (err) {
+    console.error('Error deleting employee:', err);
     res.status(500).json({ message: err.message });
   }
 };
