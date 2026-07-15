@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -49,7 +49,7 @@ const Register = () => {
     };
 
     try {
-      const res = await axios.post("http://localhost:303/api/auth/register", userData);
+      const res = await api.post('/api/auth/register', userData);
 
       const user = res.data.user;
       const token = res.data.token;

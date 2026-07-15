@@ -11,10 +11,8 @@ import {
   Paper,
 } from '@mui/material';
 
-import axios from 'axios';
+import api from '../utils/api';
 import { Cardforcompanyies } from '../components/Jobcard';
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 const Company = () => {
   const [allCompanies, setAllCompanies] = useState([]);
@@ -23,7 +21,7 @@ const Company = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/employers`);
+        const res = await api.get('/api/employers');
         const mappedCompanies = res.data.map(emp => ({
           name: emp.companyName || 'Unknown Company',
           logo: emp.companyLOGO,

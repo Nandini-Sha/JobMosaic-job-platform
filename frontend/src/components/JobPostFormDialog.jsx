@@ -4,11 +4,9 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, TextField, MenuItem, Stack
 } from '@mui/material';
-import axios from 'axios';
+import api from '../utils/api';
 
 const employmentOptions = ['Full-Time', 'Part-Time', 'Contract', 'Internship', 'Freelance'];
-const API_URL = import.meta.env.VITE_API_URL;
-
 const JobPostFormDialog = ({ open, onClose, employerId, jobData, onSuccess }) => {
   const [form, setForm] = useState({
     title: '',
@@ -102,11 +100,11 @@ const handleSubmit = async () => {
   };
 
   try {
-    if (jobData) {
-      await axios.put(`${API_URL}/api/jobs/${jobData._id}`, payload);
-    } else {
-      await axios.post(`${API_URL}/api/jobs`, payload);
-    }
+      if (jobData) {
+        await api.put(`/api/jobs/${jobData._id}`, payload);
+      } else {
+        await api.post(`/api/jobs`, payload);
+      }
     onSuccess();
   } catch (error) {
     console.error('Job submission failed:', error.response?.data || error.message);

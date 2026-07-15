@@ -26,12 +26,10 @@ const EmployeeProfile = ({ employeeId }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [employeeRes, userRes] = await Promise.all([
-          axios.get(`${API_URL}/api/employees/${employeeId}`),
-          axios.get(`${API_URL}/api/user/${userId}`)
-        ]);
+        const userRes = await api.get(`/api/user/${userId}`);
+        const empRes = await api.get(`/api/employees/by-user/${userId}`);
 
-        setEmployee(employeeRes.data);
+        setEmployee(empRes.data);
         setUser(userRes.data);
       } catch (err) {
         console.error('Error fetching data:', err);

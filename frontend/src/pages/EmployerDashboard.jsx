@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import {
   Box, Typography, Paper, Stack, Button, CircularProgress,
   Dialog, DialogTitle, DialogContent, DialogActions,
@@ -16,7 +16,9 @@ import { ApplicationsListDialog, SingleApplicationDialog } from '../components/d
 import ImageCropperDialog from '../components/dashboard/ImageCropperDialog';
 import defaultIndustry from '../assets/industry.jpg';
 import { useNavigate } from 'react-router-dom';
+
 const API_URL = import.meta.env.VITE_API_URL;
+
 const EmployerDashboard = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,8 +46,8 @@ const EmployerDashboard = () => {
   const fetchEmployerProfile = async () => {
     try {
       if (!userId) return;
-      const userRes = await axios.get(`${API_URL}/api/user/${userId}`);
-      const empRes = await axios.get(`${API_URL}/api/employers/by-user/${userId}`);
+      const userRes = await api.get(`/api/user/${userId}`);
+      const empRes = await api.get(`/api/employers/by-user/${userId}`);
       setProfile({ ...userRes.data, ...empRes.data, userId, employerId: empRes.data._id });
     } catch (error) {
       console.error('Error fetching employer:', error);
@@ -56,7 +58,7 @@ const EmployerDashboard = () => {
 
   const fetchJobStats = async (jobId) => {
     try {
-      const res = await axios.get(`${API_URL}/api/applications/job/${jobId}/stats`);
+      const res = await api.get(`/api/applications/job/${jobId}/stats`);
       const stats = res.data;
     const total = (stats.pending || 0) + (stats.selected || 0) + (stats.rejected || 0);
     setJobStats(prev => ({ ...prev, [jobId]: { ...stats, total } }));
@@ -68,13 +70,13 @@ const EmployerDashboard = () => {
   const fetchJobs = async () => {
   try {
     if (!profile?.employerId) return;
-    const res = await axios.get(`${API_URL}/api/jobs/employer/${profile.employerId}`);
+    const res = await api.get(`/api/jobs/employer/${profile.employerId}`);
     setJobs(res.data);
 
     // Wait for all stats to be fetched
     const updatedStats = await Promise.all(
       res.data.map(async (job) => {
-        const statsRes = await axios.get(`${API_URL}/api/applications/job/${job._id}/stats`);
+        const statsRes = await api.get(`/api/applications/job/${job._id}/stats`);
         const stats = statsRes.data;
         const total = (stats.pending || 0) + (stats.selected || 0) + (stats.rejected || 0);
 
@@ -110,7 +112,7 @@ const EmployerDashboard = () => {
 
   const fetchApplicationsForJob = async (jobId) => {
   try {
-    const res = await axios.get(`${API_URL}/api/applications/job/${jobId}?populateUser=true`);
+    const res = await api.get(`/api/applications/job/${jobId}?populateUser=true`);
     setSelectedJobApplications(res.data);
     setOpenApplicationsDialog(true);
     
@@ -122,7 +124,7 @@ const EmployerDashboard = () => {
 
   const fetchApplicationDetails = async (applicationId) => {
     try {
-      const res = await axios.get(`${API_URL}/api/applications/${applicationId}`);
+      const res = await api.get(`/api/applications/${applicationId}`);
       setSelectedApplication(res.data);
       setOpenApplicationDialog(true);
     } catch (err) {
@@ -132,7 +134,7 @@ const EmployerDashboard = () => {
 
   const handleUpdateApplicationStatus = async (applicationId, status) => {
     try {
-      await axios.put(`${API_URL}/api/applications/${applicationId}`, { status });
+      await api.put(`/api/applications/${applicationId}`, { status });
       if (selectedJobApplications.length > 0) {
         fetchApplicationsForJob(selectedJobApplications[0].jobId._id);
       }
@@ -189,8 +191,7 @@ const showCroppedImage = async () => {
     formData.append('industry', profile?.industry || '');
     formData.append('contactPerson', profile?.contactPerson || '');
 
-    // 🔄 Send to backend
-    await axios.put(`${API_URL}/api/employers/${profile.employerId}`, formData, {
+    await api.put(`/api/employers/${profile.employerId}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
 
@@ -203,7 +204,7 @@ const showCroppedImage = async () => {
 
   const handleDeleteJob = async (jobId) => {
     try {
-      await axios.delete(`${API_URL}/api/jobs/${jobId}`);
+      await api.delete(`/api/jobs/${jobId}`);
       fetchJobs();
     } catch (err) {
       console.error('Delete failed:', err);
@@ -212,8 +213,8 @@ const showCroppedImage = async () => {
 
   const handleConfirmDelete = async () => {
     try {
-      await axios.delete(`${API_URL}/api/user/${userId}`);
-      await axios.delete(`${API_URL}/api/employers/${profile.employerId}`);
+      await api.delete(`/api/user/${userId}`);
+      await api.delete(`/api/employers/${profile.employerId}`);
       localStorage.clear();
       navigate('/register');
     } catch (error) {

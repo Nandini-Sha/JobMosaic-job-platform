@@ -6,10 +6,8 @@ import {
   Grid,
 } from '@mui/material';
 import { JobcardforJobs } from '../components/Jobcard';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 const Jobs = () => {
   const [allJobs, setAllJobs] = useState([]);
@@ -20,7 +18,7 @@ const Jobs = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const res = await axios.get(`${API_URL}/api/jobs`);
+        const res = await api.get('/api/jobs');
         const mappedJobs = res.data.map(job => ({
           id: job._id,
           title: job.title,

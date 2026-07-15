@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Button, Typography, Alert, Dialog, DialogActions,
@@ -118,7 +118,7 @@ const EmployeeDetails = () => {
     }
 
     try {
-      await axios.post('http://localhost:303/api/employees', data, {
+      await api.post('/api/employees', data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

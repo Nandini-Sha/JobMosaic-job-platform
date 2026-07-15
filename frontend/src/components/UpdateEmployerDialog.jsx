@@ -8,8 +8,7 @@ import {
   Button,
   Stack
 } from '@mui/material';
-import axios from 'axios';
-const API_URL = import.meta.env.VITE_API_URL;
+import api from '../utils/api';
 const UpdateEmployerDialog = ({
   open,
   onClose,
@@ -64,7 +63,7 @@ const UpdateEmployerDialog = ({
       updatedData.append('position', position);
 
       // ✅ Use employerId in the request
-      await axios.put(`${API_URL}/api/employers/${employerId}`, updatedData, {
+      await api.put(`/api/employers/${employerId}`, updatedData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 

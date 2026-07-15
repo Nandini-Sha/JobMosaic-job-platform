@@ -3,8 +3,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Button, Grid, Typography
 } from '@mui/material';
-import axios from 'axios';
-const API_URL = import.meta.env.VITE_API_URL;
+import api from '../utils/api';
 const UpdateEmployeeDialog = ({ open, onClose, employeeData, onUpdate }) => {
   const [formData, setFormData] = useState({
     pastexperience: '',
@@ -67,11 +66,9 @@ const UpdateEmployeeDialog = ({ open, onClose, employeeData, onUpdate }) => {
       data.append('experience', JSON.stringify(formData.experience));
       if (formData.resume) data.append('resume', formData.resume);
 
-      await axios.put(
-        `${API_URL}/api/employees/${employeeData.userId}`,
-        data,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
-      );
+      await api.put(`/api/employees/${employeeData.userId}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
       onUpdate();
       onClose();

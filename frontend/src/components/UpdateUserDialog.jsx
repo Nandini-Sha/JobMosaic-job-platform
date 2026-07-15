@@ -8,8 +8,7 @@ import {
   Button,
   Grid
 } from '@mui/material';
-import axios from 'axios';
-const API_URL = import.meta.env.VITE_API_URL;
+import api from '../utils/api';
 const UpdateUserDialog = ({ open, onClose, userId, userData, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -56,7 +55,7 @@ const UpdateUserDialog = ({ open, onClose, userId, userData, onSuccess }) => {
   const handleSubmit = async () => {
     try {
       console.log('Updating USER:', userId, formData);
-      await axios.put(`${API_URL}/api/user/${userId}`, formData);
+      await api.put(`/api/user/${userId}`, formData);
       
       if (typeof onSuccess === 'function') {
         await onSuccess(); // Refresh profile from parent
