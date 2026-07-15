@@ -27,6 +27,11 @@ app.get('/', (req, res) => {
   res.send('🌟 JobMosaic API is running');
 });
 
+// Health check endpoint for Uptime Robot
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Server is awake' });
+});
+
 // Route Imports
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
