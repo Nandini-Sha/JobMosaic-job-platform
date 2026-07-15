@@ -6,26 +6,51 @@ import {
   Grid,
 } from '@mui/material';
 import { JobcardforJobs } from '../components/Jobcard';
-import jobs from '../data/job';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Jobs = () => {
-  const [filteredJobs, setFilteredJobs] = useState(jobs);
+  const [allJobs, setAllJobs] = useState([]);
+  const [filteredJobs, setFilteredJobs] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    const filtered = jobs.filter((job) =>
+    const fetchJobs = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/jobs`);
+        const mappedJobs = res.data.map(job => ({
+          id: job._id,
+          title: job.title,
+          company: job.employerId?.companyName || 'Unknown Company',
+          logo: job.employerId?.companyLOGO, 
+          location: `${job.location?.city || ''}, ${job.location?.country || ''}`.replace(/^, | , $/g, '') || 'N/A',
+          type: job.employmentType,
+          description: job.description,
+          postedOn: new Date(job.createdAt).toLocaleDateString()
+        }));
+        setAllJobs(mappedJobs);
+        setFilteredJobs(mappedJobs);
+      } catch (err) {
+        console.error("Failed to fetch jobs:", err);
+      }
+    };
+    fetchJobs();
+  }, []);
+
+  useEffect(() => {
+    const filtered = allJobs.filter((job) =>
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.location.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredJobs(filtered);
-  }, [searchTerm]);
+  }, [searchTerm, allJobs]);
 
-  const handleViewDetails = (job) => {
-    window.open(job.link, '_blank'); 
+  const handleViewDetails = () => {
+    navigate('/login'); 
   };
 
   return (

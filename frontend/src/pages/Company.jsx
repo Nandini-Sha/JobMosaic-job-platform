@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Box,
@@ -11,40 +11,34 @@ import {
   Paper,
 } from '@mui/material';
 
-import companies from '../data/companies';
+import axios from 'axios';
+import { Cardforcompanyies } from '../components/Jobcard';
 
-const Cardforcompanyies = ({ company }) => {
-  return (
-    <Card sx={{ maxWidth: 300, m: 1, p: 1 }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-          <Avatar src={company.logo} alt={company.name} sx={{ width: 48, height: 48 }} />
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            {company.name}
-          </Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {company.info}
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          href={company.link.startsWith('http') ? company.link : `https://${company.link}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Visit Website
-        </Button>
-      </CardContent>
-    </Card>
-  );
-};
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Company = () => {
+  const [allCompanies, setAllCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredCompanies = companies.filter((company) =>
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/employers`);
+        const mappedCompanies = res.data.map(emp => ({
+          name: emp.companyName || 'Unknown Company',
+          logo: emp.companyLOGO,
+          info: emp.companyDescription || 'No description provided.',
+          link: emp.website || ''
+        }));
+        setAllCompanies(mappedCompanies);
+      } catch (err) {
+        console.error("Failed to fetch companies:", err);
+      }
+    };
+    fetchCompanies();
+  }, []);
+
+  const filteredCompanies = allCompanies.filter((company) =>
     company.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
