@@ -29,6 +29,7 @@ app.get('/', (req, res) => {
 
 // Health check endpoint for Uptime Robot
 app.get('/api/health', (req, res) => {
+  console.log('⚡ Uptime Robot pinged the server!');
   res.status(200).json({ status: 'ok', message: 'Server is awake' });
 });
 
