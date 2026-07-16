@@ -22,6 +22,7 @@ const Jobs = () => {
         const mappedJobs = res.data.map(job => ({
           id: job._id,
           title: job.title,
+          employerId: job.employerId?._id || job.employerId,
           company: job.employerId?.companyName || 'Unknown Company',
           logo: job.employerId?.companyLOGO, 
           location: `${job.location?.city || ''}, ${job.location?.country || ''}`.replace(/^, | , $/g, '') || 'N/A',
@@ -47,8 +48,36 @@ const Jobs = () => {
     setFilteredJobs(filtered);
   }, [searchTerm, allJobs]);
 
-  const handleViewDetails = () => {
-    navigate('/login'); 
+  const handleViewDetails = async (jobId) => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    const userId = localStorage.getItem('userId');
+
+    if (token) {
+      if (role === 'employee') {
+        navigate('/employee/dashboard', { state: { openJobId: jobId } });
+      } else if (role === 'employer') {
+        const clickedJob = allJobs.find(j => j.id === jobId);
+        
+        try {
+          const empRes = await api.get(`/api/employers/by-user/${userId}`);
+          const currentUserEmployerId = empRes.data._id;
+
+          if (clickedJob && clickedJob.employerId === currentUserEmployerId) {
+            navigate('/employer/dashboard', { state: { openJobId: jobId } });
+          } else {
+            alert("You are not authorized to view this company's data.");
+          }
+        } catch (err) {
+          console.error("Error verifying employer:", err);
+          alert("An error occurred while verifying your authorization.");
+        }
+      } else {
+        navigate('/login');
+      }
+    } else {
+      navigate('/login'); 
+    }
   };
 
   return (
@@ -128,7 +157,7 @@ const Jobs = () => {
           {filteredJobs.length > 0 ? (
             filteredJobs.map((job) => (
               <Grid item key={job.id}>
-                <JobcardforJobs job={job} onView={handleViewDetails} />
+                <JobcardforJobs job={job} onView={() => handleViewDetails(job.id)} />
               </Grid>
             ))
           ) : (

@@ -15,7 +15,7 @@ import EmployerApplications from '../components/dashboard/EmployerApplications';
 import { ApplicationsListDialog, SingleApplicationDialog } from '../components/dashboard/EmployerApplicationDialogs';
 import ImageCropperDialog from '../components/dashboard/ImageCropperDialog';
 import defaultIndustry from '../assets/industry.jpg';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -39,9 +39,11 @@ const EmployerDashboard = () => {
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [openApplicationDialog, setOpenApplicationDialog] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [jobsFetched, setJobsFetched] = useState(false);
 
   const userId = localStorage.getItem('userId');
   const navigate = useNavigate();
+  const routerLocation = useLocation();
 
   const fetchEmployerProfile = async () => {
     try {
@@ -72,6 +74,7 @@ const EmployerDashboard = () => {
     if (!profile?.employerId) return;
     const res = await api.get(`/api/jobs/employer/${profile.employerId}`);
     setJobs(res.data);
+    setJobsFetched(true);
 
     // Wait for all stats to be fetched
     const updatedStats = await Promise.all(
@@ -160,6 +163,16 @@ const EmployerDashboard = () => {
       return () => clearInterval(intervalId);
     }
   }, [profile?.employerId]);
+
+  useEffect(() => {
+    if (jobsFetched && routerLocation.state?.openJobId) {
+      const jobToOpen = jobs.find(j => j._id === routerLocation.state.openJobId);
+      if (jobToOpen) {
+        fetchApplicationsForJob(jobToOpen._id);
+      }
+      navigate(routerLocation.pathname, { replace: true, state: {} });
+    }
+  }, [jobs, jobsFetched, routerLocation.state, navigate, routerLocation.pathname]);
 
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];

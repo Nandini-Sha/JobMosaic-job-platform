@@ -5,7 +5,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   DialogContentText, Tabs, Tab
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import getCroppedImg from '../utils/cropImage';
 import UpdateUserDialog from '../components/UpdateUserDialog';
 import UpdateEmployeeDialog from '../components/UpdateEmployeeDialog';
@@ -39,6 +39,7 @@ const EmployeeDashboard = () => {
   const userId = localStorage.getItem('userId') || profile?.userId;
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const fetchEmployeeProfile = async () => {
     try {
@@ -105,6 +106,18 @@ const EmployeeDashboard = () => {
     );
     setFilteredJobs(filtered);
   }, [searchQuery, allJobs]);
+
+  useEffect(() => {
+    if (allJobs.length > 0 && location.state?.openJobId) {
+      const jobToOpen = allJobs.find(j => j._id === location.state.openJobId);
+      if (jobToOpen) {
+        setSelectedJob(jobToOpen);
+        setOpenJobDialog(true);
+        // Clear the state using navigate so it doesn't reopen on every render/polling
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [allJobs, location.state, navigate, location.pathname]);
 
   const handleApply = async (jobId) => {
     try {
