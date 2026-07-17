@@ -4,6 +4,8 @@
 
 A role-based job application platform where employees can apply to jobs and employers can manage applications in real time — built with React, Node.js, and MongoDB.
 
+**🌍 Live Demo:** [https://job-mosaic-job-platform.vercel.app](https://job-mosaic-job-platform.vercel.app)
+
 ---
 
 ## 🔧 Tech Stack
